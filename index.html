@@ -30,6 +30,10 @@
 
 <body>
     <div id="root"><canvas></canvas></div>
+    <div id="game-container"></div>
+    <div id="player-list"></div>
+
+
     <script src="https://unpkg.com/nipplejs@0.10.1/dist/nipplejs.js"></script>
   <script src="https://unpkg.com/kaboom@2000.2.10/dist/kaboom.js"></script>
   <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
@@ -42,21 +46,10 @@
       useMultiplayerState,
       insertCoin, 
       myPlayer,
-      usePlayersList
+      usePlayersList, onPlayerJoins
     } = Playroom;
     window._USETEMPSTORAGE = true;
-		/*
-		   =================================================================
-			script: CrappyBird
-			author: Varun Pant  
-			date: April 6, 2014
-			site: http://www.varunpant.com			 	 
-		   =================================================================
-		*/
-
-
-        // http://paulirish.com/2011/requestanimationframe-for-smart-animating
-         // shim layer with setTimeout fallback
+	
         window.requestAnimFrame = (function () {
             return window.requestAnimationFrame ||
                 window.webkitRequestAnimationFrame ||
@@ -812,6 +805,7 @@
 					{
 					 hs = FB.score.coins
 					 setCookie("highscore", hs, 999);
+                     setCookie("highscorePlayerName", players[1].name, 999);
 					}
 					return hs;
 				  }
@@ -821,6 +815,10 @@
 					return  FB.score.coins;
 				  }
 			}
+            this.getHighScorePlayerName = function() {
+    const savedName = getCookie("highscorePlayerName");
+    return savedName ? savedName : "";
+  };
 			this.init = function(){
 						
 			    var that = this;
@@ -850,14 +848,21 @@
 				}
 				FB.bird.update();
 			}
-			
+			this.playersNames = function(){
+                const name1 = "Current Player: " + players[1].name;
+                // console.log(name1);
+                return name1;
+            }
 			this.render = function(){
 				if(this.banner){
 					FB.Draw.Image(this.banner,42,70);
 					FB.Draw.Image(this.medal,75,183);
 					FB.Draw.Image(this.replay,102.5,260);
 					FB.Draw.text(FB.score.coins, 220, 185, 15, 'black');
-					FB.Draw.text(this.highscore, 220, 225, 15, 'black');
+                    FB.Draw.text(this.playersNames(), 60, 140, 15, 'black');
+                    FB.Draw.text(this.getHighScorePlayerName(), 220, 225, 15, 'black');
+					FB.Draw.text(this.highscore, 220, 240, 15, 'black');
+                    
 				}
 			}
 		
@@ -865,13 +870,58 @@
 
         window.addEventListener('load', FB.init, false);
         window.addEventListener('resize', FB.resize, false);
+//         insertCoin().then(() => {
+//   window.init;
+// });
+        // Initialize the game
+// FB.init();
+
+// Store the players' names
+const players = [];
+const players1 = [];
+
+// Function to handle player join event
+function handlePlayerJoin(player) {
+  players.push(player.name);
+  console.log(player.name);
+//   updatePlayerList();
+}
+
+// Function to update the player list display
+function updatePlayerList() {
+  const playerListElement = document.getElementById('player-list');
+  playerListElement.innerHTML = players.map(player => `<li>${player}</li>`).join('');
+  const playerDisplayElement = document.getElementById('player-display');
+  playerDisplayElement.innerHTML = players.join(', ');
+}
+
+// Call insertCoin and start the game after it resolves
+insertCoin().then(() => {
+  // Register the onPlayerJoin event handler
+  Playroom.onPlayerJoin((state) => {
+  const playerId = state.id;
+  const player = { id: playerId, name: state.getProfile().name};
+  console.log(player.name);
+//    
+  players.push(playerId, player);
+  players1.push(player.name);
+//   updatePlayerList();
+});
+// console.log(players1);
+  // Start the game
+  window.play;
+});
 
 
-        const root = document.querySelector('#root');
-        insertCoin().then(()=>{
-        ReactDOM.render(Window.play, root);
-        });
+
+        // const root = document.querySelector('#root');
+        // insertCoin().then(()=>{
+        // ReactDOM.render(React.createElement(Window.play), root);
+        // });
+//         const gameContainer = document.querySelector('#game-container');
+//   ReactDOM.render(React.createElement(Window.play), gameContainer);
     </script>
+    
 
 </body>
 
